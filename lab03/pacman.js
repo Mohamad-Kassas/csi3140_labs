@@ -4,6 +4,7 @@ let ghostIndex;
 let fruitIndex;
 let numPellets;
 let score = 0;
+let gameStatus;
 
 function generateThreeRandomIndices(length) {
     const indices = new Set();
@@ -14,6 +15,8 @@ function generateThreeRandomIndices(length) {
 }
 
 function createGame(n) {
+    gameStatus = "running";
+
     gameBoard = new Array(n).fill(".");
     [pacmanIndex, ghostIndex, fruitIndex] = generateThreeRandomIndices(n);
 
@@ -37,6 +40,10 @@ function process_move() {
         score += 1
         gameBoard[pacmanIndex] = "C";
         numPellets--;
+    } 
+
+    if (numPellets === 0) {
+        gameStatus = "won";
     }
 }
 
@@ -68,18 +75,28 @@ function moveRight() {
     process_move();
 }
 
-document.addEventListener('keydown', (event) => {
+const keydownHandler = (event) => {
     if (event.key === 'ArrowLeft') {
         moveLeft();
     }
     else if (event.key === 'ArrowRight') {
         moveRight();
     }
+
+    if (gameStatus === "won") {
+        document.removeEventListener('keydown', keydownHandler);
+    }
+
     _render_(gameBoard);
-});
+}
+
+document.addEventListener('keydown', keydownHandler);
 
 
 function _render_(gameBoard) {
+    const gameStatusDiv = document.getElementById('gameStatus');
+    gameStatusDiv.textContent = gameStatus === "running" ? 'Game is running' : 'You won!';
+
     const scoreDiv = document.getElementById('score');
     scoreDiv.textContent = 'Score: ' + score;
 
