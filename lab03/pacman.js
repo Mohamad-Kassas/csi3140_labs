@@ -50,6 +50,11 @@ function process_move() {
     if (numPellets === 0) {
         gameStatus = "You won!";
     }
+
+    if (gameStatus === "You won!" || gameStatus === "You lost!") {
+        document.removeEventListener('keydown', keydownHandler);
+        clearInterval(interval);
+    }
 }
 
 function moveLeft(index, character) {
@@ -104,11 +109,6 @@ const keydownHandler = (event) => {
     }
 
     process_move();
-
-    if (gameStatus === "You won!" || gameStatus === "You lost!") {
-        document.removeEventListener('keydown', keydownHandler);
-        clearInterval(interval);
-    }
 
     _render_(gameBoard);
 }
