@@ -15,7 +15,7 @@ function generateThreeRandomIndices(length) {
 }
 
 function createGame(n) {
-    gameStatus = "running";
+    gameStatus = "Game is running";
 
     gameBoard = new Array(n).fill(".");
     [pacmanIndex, ghostIndex, fruitIndex] = generateThreeRandomIndices(n);
@@ -31,6 +31,11 @@ function createGame(n) {
 
 
 function process_move() {
+    if (pacmanIndex === ghostIndex) {
+        gameBoard[pacmanIndex] = "X";
+        gameStatus = "You lost!";
+    }
+
     if (pacmanIndex === fruitIndex) {
         score += 10;
         gameBoard[pacmanIndex] = "C";
@@ -43,48 +48,66 @@ function process_move() {
     } 
 
     if (numPellets === 0) {
-        gameStatus = "won";
+        gameStatus = "You won!";
     }
 }
 
-function moveLeft() {
-    if (pacmanIndex > 0) {
-        gameBoard[pacmanIndex] = gameBoard[pacmanIndex].replace("C", "");
-        pacmanIndex--;
-        gameBoard[pacmanIndex] = "C" + gameBoard[pacmanIndex];
+function moveLeft(index, character) {
+    if (index > 0) {
+        gameBoard[index] = gameBoard[index].replace(character, "");
+        index--;
+        gameBoard[index] = character + gameBoard[index];
     }
     else {
-        gameBoard[pacmanIndex] = gameBoard[pacmanIndex].replace("C", "");
-        pacmanIndex = gameBoard.length - 1;
-        gameBoard[pacmanIndex] = "C" + gameBoard[pacmanIndex];
+        gameBoard[index] = gameBoard[index].replace(character, "");
+        index = gameBoard.length - 1;
+        gameBoard[index] = character + gameBoard[index];
     }
-    process_move();
+
+    return index;
 }
 
-function moveRight() {
-    if (pacmanIndex < gameBoard.length - 1) {
-        gameBoard[pacmanIndex] = gameBoard[pacmanIndex].replace("C", "");
-        pacmanIndex++;
-        gameBoard[pacmanIndex] = "C" + gameBoard[pacmanIndex];;
+function moveRight(index, character) {
+    if (index < gameBoard.length - 1) {
+        gameBoard[index] = gameBoard[index].replace(character, "");
+        index++;
+        gameBoard[index] = character + gameBoard[index];
     }
     else {
-        gameBoard[pacmanIndex] = gameBoard[pacmanIndex].replace("C", "");
-        pacmanIndex = 0;
-        gameBoard[pacmanIndex] = "C" + gameBoard[pacmanIndex];;
+        gameBoard[index] = gameBoard[index].replace(character, "");
+        index = 0;
+        gameBoard[index] = character + gameBoard[index];
+    }
+    return index;
+}
+
+function moveGhost() {
+    let direction = Math.random() < 0.5 ? -1 : 1;
+    
+    if (direction === -1) {
+        ghostIndex = moveLeft(ghostIndex, "^");
+    }
+    else {
+        ghostIndex = moveRight(ghostIndex, "^");
     }
     process_move();
+    _render_(gameBoard);
+
 }
 
 const keydownHandler = (event) => {
     if (event.key === 'ArrowLeft') {
-        moveLeft();
+        pacmanIndex = moveLeft(pacmanIndex, "C");
     }
     else if (event.key === 'ArrowRight') {
-        moveRight();
+        pacmanIndex = moveRight(pacmanIndex, "C");
     }
 
-    if (gameStatus === "won") {
+    process_move();
+
+    if (gameStatus === "You won!" || gameStatus === "You lost!") {
         document.removeEventListener('keydown', keydownHandler);
+        clearInterval(interval);
     }
 
     _render_(gameBoard);
@@ -93,9 +116,12 @@ const keydownHandler = (event) => {
 document.addEventListener('keydown', keydownHandler);
 
 
-function _render_(gameBoard) {
+function _render_(gameBoard) {    
     const gameStatusDiv = document.getElementById('gameStatus');
-    gameStatusDiv.textContent = gameStatus === "running" ? 'Game is running' : 'You won!';
+
+    
+
+    gameStatusDiv.textContent = gameStatus
 
     const scoreDiv = document.getElementById('score');
     scoreDiv.textContent = 'Score: ' + score;
@@ -113,6 +139,7 @@ function _render_(gameBoard) {
 
 
 let game = createGame(15);
+let interval = setInterval(moveGhost, 2000);
 _render_(game);
 
 const style = document.createElement('style');
