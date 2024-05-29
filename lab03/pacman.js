@@ -1,3 +1,8 @@
+let gameBoard;
+let pacmanIndex;
+let ghostIndex;
+let fruitIndex;
+
 function generateThreeRandomIndices(length) {
     const indices = new Set();
     while (indices.size < 3) {
@@ -7,14 +12,40 @@ function generateThreeRandomIndices(length) {
 }
 
 function createGame(n) {
-    let gameBoard = new Array(n).fill(".");
-    let [index1, index2, index3] = generateThreeRandomIndices(n);
+    gameBoard = new Array(n).fill(".");
+    [pacmanIndex, ghostIndex, fruitIndex] = generateThreeRandomIndices(n);
 
-    gameBoard[index1] = "C";
-    gameBoard[index2] = "@";
-    gameBoard[index3] = "^" + gameBoard[index3];
+    gameBoard[pacmanIndex] = "C";
+    gameBoard[ghostIndex] = "^" + gameBoard[ghostIndex];
+    gameBoard[fruitIndex] = "@";
 
     return gameBoard;
+}
+
+function moveLeft() {
+    if (pacmanIndex > 0) {
+        gameBoard[pacmanIndex] = gameBoard[pacmanIndex].replace("C", "");
+        pacmanIndex--;
+        gameBoard[pacmanIndex] = "C" + gameBoard[pacmanIndex];
+    }
+    else {
+        gameBoard[pacmanIndex] = gameBoard[pacmanIndex].replace("C", "");
+        pacmanIndex = gameBoard.length - 1;
+        gameBoard[pacmanIndex] = "C" + gameBoard[pacmanIndex];
+    }
+}
+
+function moveRight() {
+    if (pacmanIndex < gameBoard.length - 1) {
+        gameBoard[pacmanIndex] = gameBoard[pacmanIndex].replace("C", "");
+        pacmanIndex++;
+        gameBoard[pacmanIndex] = "C" + gameBoard[pacmanIndex];;
+    }
+    else {
+        gameBoard[pacmanIndex] = gameBoard[pacmanIndex].replace("C", "");
+        pacmanIndex = 0;
+        gameBoard[pacmanIndex] = "C" + gameBoard[pacmanIndex];;
+    }
 }
 
 
@@ -30,11 +61,19 @@ function _render_(gameBoard) {
     }
 }
 
-// Example usage:
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowLeft') {
+        moveLeft();
+    }
+    else if (event.key === 'ArrowRight') {
+        moveRight();
+    }
+    _render_(gameBoard);
+});
+
 let game = createGame(15);
 _render_(game);
 
-// CSS to style the game cells (optional)
 const style = document.createElement('style');
 style.innerHTML = `
     #gameBoard {
